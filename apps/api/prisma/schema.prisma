@@ -61,3 +61,20 @@ model Branch {
 
   @@map("branches")
 }
+
+enum PlatformRole {
+  OWNER
+  SALES
+}
+
+model PlatformUser {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  name         String
+  role         PlatformRole @default(SALES)
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  @@map("platform_users")
+}

@@ -7,6 +7,7 @@ import { BranchesModule } from './branches/branches.module';
 import { StudentsModule } from './students/students.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { PlatformModule } from './platform/platform.module';
 import { TenantMiddleware } from './tenants/tenant.middleware';
 
 @Module({
@@ -19,6 +20,7 @@ import { TenantMiddleware } from './tenants/tenant.middleware';
     StudentsModule,
     DashboardModule,
     AttendanceModule,
+    PlatformModule,
   ],
 })
 export class AppModule implements NestModule {
@@ -27,6 +29,7 @@ export class AppModule implements NestModule {
       .apply(TenantMiddleware)
       .exclude(
         { path: 'api/auth/register-tenant', method: RequestMethod.POST },
+        { path: 'api/platform/(.*)', method: RequestMethod.ALL },
         { path: 'api/health', method: RequestMethod.GET },
       )
       .forRoutes('*');
