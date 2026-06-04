@@ -9,6 +9,7 @@ export type { StudentRecord };
 interface FindAllOptions {
   search?: string;
   status?: string;
+  branchId?: string;
   page: number;
   limit: number;
 }
@@ -18,11 +19,16 @@ export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(schemaName: string, options: FindAllOptions) {
-    const { search, status, page, limit } = options;
+    const { search, status, branchId, page, limit } = options;
     const offset = (page - 1) * limit;
 
     let whereClause = `WHERE 1=1`;
     const params: unknown[] = [];
+
+    if (branchId) {
+      params.push(branchId);
+      whereClause += ` AND branch_id = $${params.length}`;
+    }
 
     if (status) {
       params.push(status);
@@ -40,13 +46,13 @@ export class StudentsService {
 
     const students = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
       `SELECT * FROM "${schemaName}"."students" ${whereClause} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`,
-      ...params
+      ...params,
     );
 
     const countParams = params.slice(0, -2);
     const countResult = await this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
       `SELECT COUNT(*) as count FROM "${schemaName}"."students" ${whereClause}`,
-      ...countParams
+      ...countParams,
     );
 
     return {
@@ -63,7 +69,7 @@ export class StudentsService {
   async findOne(schemaName: string, id: string): Promise<StudentRecord> {
     const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
       `SELECT * FROM "${schemaName}"."students" WHERE id = $1`,
-      id
+      id,
     );
     if (!results[0]) {
       throw new NotFoundException('Student not found');
@@ -73,11 +79,12 @@ export class StudentsService {
 
   async create(schemaName: string, dto: CreateStudentDto): Promise<StudentRecord> {
     const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
-      `INSERT INTO "${schemaName}"."students" (name, email, phone, parent_name, parent_phone, grade, class_name, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO "${schemaName}"."students"
+         (branch_id, name, email, phone, parent_name, parent_phone, grade, class_name, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      dto.name, dto.email || null, dto.phone || null, dto.parentName || null,
-      dto.parentPhone || null, dto.grade || null, dto.className || null, dto.notes || null
+      dto.branchId, dto.name, dto.email || null, dto.phone || null, dto.parentName || null,
+      dto.parentPhone || null, dto.grade || null, dto.className || null, dto.notes || null,
     );
     return results[0];
   }
@@ -87,20 +94,21 @@ export class StudentsService {
 
     const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
       `UPDATE "${schemaName}"."students"
-       SET name = COALESCE($2, name),
-           email = COALESCE($3, email),
-           phone = COALESCE($4, phone),
-           parent_name = COALESCE($5, parent_name),
-           parent_phone = COALESCE($6, parent_phone),
-           grade = COALESCE($7, grade),
-           class_name = COALESCE($8, class_name),
-           notes = COALESCE($9, notes),
-           updated_at = NOW()
+       SET branch_id    = COALESCE($2, branch_id),
+           name         = COALESCE($3, name),
+           email        = COALESCE($4, email),
+           phone        = COALESCE($5, phone),
+           parent_name  = COALESCE($6, parent_name),
+           parent_phone = COALESCE($7, parent_phone),
+           grade        = COALESCE($8, grade),
+           class_name   = COALESCE($9, class_name),
+           notes        = COALESCE($10, notes),
+           updated_at   = NOW()
        WHERE id = $1
        RETURNING *`,
-      id, dto.name || null, dto.email || null, dto.phone || null,
+      id, dto.branchId || null, dto.name || null, dto.email || null, dto.phone || null,
       dto.parentName || null, dto.parentPhone || null, dto.grade || null,
-      dto.className || null, dto.notes || null
+      dto.className || null, dto.notes || null,
     );
     return results[0];
   }
@@ -109,7 +117,7 @@ export class StudentsService {
     await this.findOne(schemaName, id);
     await this.prisma.$executeRawUnsafe(
       `UPDATE "${schemaName}"."students" SET status = 'archived', updated_at = NOW() WHERE id = $1`,
-      id
+      id,
     );
   }
 }

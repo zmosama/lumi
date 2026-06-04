@@ -1,5 +1,6 @@
 export interface StudentRecord {
   id: string;
+  branch_id: string;
   name: string;
   email: string | null;
   phone: string | null;

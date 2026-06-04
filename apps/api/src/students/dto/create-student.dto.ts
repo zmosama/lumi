@@ -2,6 +2,11 @@ import { IsString, IsOptional, IsEmail, IsNotEmpty } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateStudentDto {
+  @ApiProperty({ example: 'branch_id_here', description: 'ID الفرع' })
+  @IsString()
+  @IsNotEmpty()
+  branchId: string;
+
   @ApiProperty({ example: 'محمد أحمد' })
   @IsString()
   @IsNotEmpty()

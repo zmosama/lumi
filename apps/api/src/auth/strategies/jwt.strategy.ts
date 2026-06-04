@@ -8,6 +8,15 @@ export interface JwtPayload {
   tenantId: string;
   schemaName: string;
   role: string;
+  orgType: string;
+}
+
+export interface AuthUser {
+  userId: string;
+  tenantId: string;
+  schemaName: string;
+  role: string;
+  orgType: string;
 }
 
 @Injectable()
@@ -20,10 +29,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<AuthUser> {
     if (!payload.sub || !payload.tenantId) {
       throw new UnauthorizedException();
     }
-    return { userId: payload.sub, tenantId: payload.tenantId, schemaName: payload.schemaName, role: payload.role };
+    return {
+      userId: payload.sub,
+      tenantId: payload.tenantId,
+      schemaName: payload.schemaName,
+      role: payload.role,
+      orgType: payload.orgType,
+    };
   }
 }

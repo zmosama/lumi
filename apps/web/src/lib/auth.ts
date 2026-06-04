@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { OrgType } from '@/types';
 
 export interface LoginPayload {
   email: string;
@@ -9,6 +10,13 @@ export interface LoginPayload {
 export interface RegisterPayload {
   tenantName: string;
   subdomain: string;
+  orgType: OrgType;
+  initialBranch: {
+    name: string;
+    area?: string;
+    curriculums?: string[];
+    ownership?: string;
+  };
   adminEmail: string;
   adminPassword: string;
   adminName: string;

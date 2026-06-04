@@ -1,5 +1,23 @@
+export type OrgType = 'SCHOOL' | 'CENTER' | 'PRIVATE_TUTOR';
+
+export type Curriculum = 'ARABIC' | 'LANGUAGES' | 'IG';
+export type Ownership = 'PRIVATE' | 'GOVERNMENT';
+
+export interface Branch {
+  id: string;
+  tenantId: string;
+  name: string;
+  area: string | null;
+  isMain: boolean;
+  curriculums: Curriculum[];
+  ownership: Ownership | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface Student {
   id: string;
+  branch_id: string;
   name: string;
   email: string | null;
   phone: string | null;
@@ -15,6 +33,7 @@ export interface Student {
 
 export interface Teacher {
   id: string;
+  branch_id: string | null;
   name: string;
   email: string | null;
   phone: string | null;
@@ -70,4 +89,30 @@ export interface Tenant {
   id: string;
   name: string;
   subdomain: string;
+  orgType: OrgType;
 }
+
+// Labels for org types in Arabic
+export const ORG_TYPE_LABELS: Record<OrgType, string> = {
+  SCHOOL: 'مدرسة',
+  CENTER: 'سنتر تعليمي',
+  PRIVATE_TUTOR: 'مدرس خصوصي',
+};
+
+export const CURRICULUM_LABELS: Record<Curriculum, string> = {
+  ARABIC: 'عربي',
+  LANGUAGES: 'لغات',
+  IG: 'IG',
+};
+
+export const OWNERSHIP_LABELS: Record<Ownership, string> = {
+  PRIVATE: 'خاصة',
+  GOVERNMENT: 'حكومية',
+};
+
+// What to call "branch" per org type
+export const BRANCH_TERM: Record<OrgType, { singular: string; plural: string }> = {
+  SCHOOL: { singular: 'فرع', plural: 'الفروع' },
+  CENTER: { singular: 'فرع', plural: 'الفروع' },
+  PRIVATE_TUTOR: { singular: 'مجموعة', plural: 'المجموعات' },
+};

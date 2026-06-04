@@ -17,9 +17,14 @@ export class AuthService {
   ) {}
 
   async registerTenant(dto: RegisterTenantDto) {
-    const { tenantName, subdomain, adminEmail, adminPassword, adminName } = dto;
+    const { tenantName, subdomain, orgType, initialBranch, adminEmail, adminPassword, adminName } = dto;
 
-    const { id: tenantId, schemaName } = await this.tenantsService.provisionTenant(tenantName, subdomain);
+    const { id: tenantId, schemaName } = await this.tenantsService.provisionTenant({
+      name: tenantName,
+      subdomain,
+      orgType,
+      initialBranch,
+    });
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email_tenantId: { email: adminEmail, tenantId } },
@@ -30,20 +35,14 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(adminPassword, 10);
     const user = await this.prisma.user.create({
-      data: {
-        email: adminEmail,
-        passwordHash,
-        name: adminName,
-        role: 'admin',
-        tenantId,
-      },
+      data: { email: adminEmail, passwordHash, name: adminName, role: 'admin', tenantId },
     });
 
-    const tokens = this.generateTokens(user.id, tenantId, schemaName, user.role);
+    const tokens = this.generateTokens(user.id, tenantId, schemaName, user.role, orgType);
 
     return {
       message: 'Tenant registered successfully',
-      tenant: { id: tenantId, name: tenantName, subdomain },
+      tenant: { id: tenantId, name: tenantName, subdomain, orgType },
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       ...tokens,
     };
@@ -71,17 +70,17 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user.id, tenant.id, tenant.schemaName, user.role);
+    const tokens = this.generateTokens(user.id, tenant.id, tenant.schemaName, user.role, tenant.orgType);
 
     return {
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      tenant: { id: tenant.id, name: tenant.name, subdomain: tenant.subdomain },
+      tenant: { id: tenant.id, name: tenant.name, subdomain: tenant.subdomain, orgType: tenant.orgType },
       ...tokens,
     };
   }
 
-  private generateTokens(userId: string, tenantId: string, schemaName: string, role: string) {
-    const payload = { sub: userId, tenantId, schemaName, role };
+  private generateTokens(userId: string, tenantId: string, schemaName: string, role: string, orgType: string) {
+    const payload = { sub: userId, tenantId, schemaName, role, orgType };
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {

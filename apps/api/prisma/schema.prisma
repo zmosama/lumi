@@ -11,15 +11,23 @@ datasource db {
 // Each tenant gets their own PostgreSQL schema with:
 // Student, Teacher, Class, Attendance, Payment models (created via raw SQL on provisioning)
 
+enum OrgType {
+  SCHOOL
+  CENTER
+  PRIVATE_TUTOR
+}
+
 model Tenant {
   id         String   @id @default(cuid())
   name       String
   subdomain  String   @unique
   schemaName String   @unique @map("schema_name")
+  orgType    OrgType  @default(SCHOOL) @map("org_type")
   plan       String   @default("trial")
   isActive   Boolean  @default(true) @map("is_active")
   createdAt  DateTime @default(now()) @map("created_at")
   users      User[]
+  branches   Branch[]
 
   @@map("tenants")
 }
@@ -36,4 +44,20 @@ model User {
 
   @@unique([email, tenantId])
   @@map("users")
+}
+
+// Branch = فرع للمدرسة/السنتر، أو مجموعة/منطقة للمدرس الخصوصي
+model Branch {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  area        String?
+  isMain      Boolean  @default(false) @map("is_main")
+  curriculums String[] // للمدارس: [ARABIC, LANGUAGES, IG] — ممكن أكتر من نوع
+  ownership   String?  // للمدارس: PRIVATE | GOVERNMENT
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("branches")
 }

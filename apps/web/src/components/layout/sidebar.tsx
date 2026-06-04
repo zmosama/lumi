@@ -4,35 +4,43 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { logout, getTenant, getUser } from '@/lib/auth';
+import { OrgType, ORG_TYPE_LABELS, BRANCH_TERM } from '@/types';
 import {
-  LayoutDashboard,
-  Users,
-  CheckSquare,
-  DollarSign,
-  GraduationCap,
-  LogOut,
-  Menu,
-  X,
+  LayoutDashboard, Users, CheckSquare, DollarSign,
+  GraduationCap, LogOut, Menu, X, GitBranch,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-const navItems = [
-  { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
-  { href: '/students', label: 'الطلاب', icon: Users },
-  { href: '/attendance', label: 'الحضور والغياب', icon: CheckSquare },
-  { href: '/finance', label: 'المالية', icon: DollarSign },
-];
+function buildNavItems(orgType: OrgType) {
+  const branchLabel = BRANCH_TERM[orgType].plural;
+  return [
+    { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
+    { href: '/branches', label: branchLabel, icon: GitBranch },
+    { href: '/students', label: 'الطلاب', icon: Users },
+    { href: '/attendance', label: 'الحضور والغياب', icon: CheckSquare },
+    { href: '/finance', label: 'المالية', icon: DollarSign },
+  ];
+}
+
+const ORG_TYPE_BADGE_COLOR: Record<OrgType, string> = {
+  SCHOOL: 'bg-blue-100 text-blue-700',
+  CENTER: 'bg-purple-100 text-purple-700',
+  PRIVATE_TUTOR: 'bg-green-100 text-green-700',
+};
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [tenant, setTenant] = useState<{ name: string } | null>(null);
+  const [tenant, setTenant] = useState<{ name: string; orgType?: OrgType } | null>(null);
   const [user, setUser] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
     setTenant(getTenant());
     setUser(getUser());
   }, []);
+
+  const orgType = (tenant?.orgType || 'SCHOOL') as OrgType;
+  const navItems = buildNavItems(orgType);
 
   return (
     <>
@@ -46,10 +54,7 @@ export function Sidebar() {
 
       {/* Overlay */}
       {isOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/40 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setIsOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -61,16 +66,18 @@ export function Sidebar() {
         )}
       >
         {/* Header */}
-        <div className="p-6 border-b border-primary-500">
+        <div className="p-5 border-b border-primary-500">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <h1 className="font-ibm font-bold text-xl text-accent">لومي</h1>
-              <p className="text-primary-200 text-xs mt-0.5">{tenant?.name || 'نظام إدارة المدارس'}</p>
+              <p className="text-primary-100 text-xs mt-0.5 truncate">{tenant?.name || 'نظام إدارة المؤسسات'}</p>
+              {tenant?.orgType && (
+                <span className={cn('inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium', ORG_TYPE_BADGE_COLOR[orgType])}>
+                  {ORG_TYPE_LABELS[orgType]}
+                </span>
+              )}
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="lg:hidden text-primary-200 hover:text-white"
-            >
+            <button onClick={() => setIsOpen(false)} className="lg:hidden text-primary-200 hover:text-white flex-shrink-0">
               <X size={20} />
             </button>
           </div>
@@ -103,7 +110,7 @@ export function Sidebar() {
         {/* User info + logout */}
         <div className="p-4 border-t border-primary-500">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
               <GraduationCap size={16} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">

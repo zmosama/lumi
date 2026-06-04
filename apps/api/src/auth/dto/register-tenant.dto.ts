@@ -1,5 +1,40 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail, IsString, MinLength, MaxLength, Matches, IsNotEmpty,
+  IsEnum, IsOptional, IsArray, ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrgType } from '@prisma/client';
+
+class InitialBranchDto {
+  @ApiProperty({ example: 'الفرع الرئيسي' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 'المعادي' })
+  @IsString()
+  @IsOptional()
+  area?: string;
+
+  @ApiPropertyOptional({
+    description: 'للمدارس فقط: أنواع المناهج',
+    enum: ['ARABIC', 'LANGUAGES', 'IG'],
+    isArray: true,
+    example: ['LANGUAGES'],
+  })
+  @IsArray()
+  @IsOptional()
+  curriculums?: string[];
+
+  @ApiPropertyOptional({
+    description: 'للمدارس فقط: PRIVATE | GOVERNMENT',
+    example: 'PRIVATE',
+  })
+  @IsString()
+  @IsOptional()
+  ownership?: string;
+}
 
 export class RegisterTenantDto {
   @ApiProperty({ example: 'مدرسة النور' })
@@ -13,6 +48,15 @@ export class RegisterTenantDto {
   @MinLength(3)
   @MaxLength(30)
   subdomain: string;
+
+  @ApiProperty({ enum: OrgType, example: OrgType.SCHOOL })
+  @IsEnum(OrgType)
+  orgType: OrgType;
+
+  @ApiProperty({ type: InitialBranchDto })
+  @ValidateNested()
+  @Type(() => InitialBranchDto)
+  initialBranch: InitialBranchDto;
 
   @ApiProperty({ example: 'admin@alnoor.com' })
   @IsEmail()

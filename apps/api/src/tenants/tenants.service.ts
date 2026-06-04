@@ -1,11 +1,27 @@
 import { Injectable, ConflictException } from '@nestjs/common';
+import { OrgType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+export interface ProvisionOptions {
+  name: string;
+  subdomain: string;
+  orgType: OrgType;
+  initialBranch: {
+    name: string;
+    area?: string;
+    curriculums?: string[];
+    ownership?: string;
+  };
+}
 
 @Injectable()
 export class TenantsService {
   constructor(private prisma: PrismaService) {}
 
-  async provisionTenant(name: string, subdomain: string): Promise<{ id: string; schemaName: string }> {
+  async provisionTenant(
+    opts: ProvisionOptions,
+  ): Promise<{ id: string; schemaName: string; branchId: string }> {
+    const { name, subdomain, orgType, initialBranch } = opts;
     const schemaName = `tenant_${subdomain.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
     const existing = await this.prisma.tenant.findUnique({ where: { subdomain } });
@@ -14,12 +30,23 @@ export class TenantsService {
     }
 
     const tenant = await this.prisma.tenant.create({
-      data: { name, subdomain, schemaName },
+      data: { name, subdomain, schemaName, orgType },
+    });
+
+    const branch = await this.prisma.branch.create({
+      data: {
+        tenantId: tenant.id,
+        name: initialBranch.name,
+        area: initialBranch.area,
+        isMain: true,
+        curriculums: initialBranch.curriculums ?? [],
+        ownership: initialBranch.ownership,
+      },
     });
 
     await this.createTenantSchema(schemaName);
 
-    return { id: tenant.id, schemaName };
+    return { id: tenant.id, schemaName, branchId: branch.id };
   }
 
   private async createTenantSchema(schemaName: string): Promise<void> {
@@ -28,6 +55,7 @@ export class TenantsService {
     await this.prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}"."students" (
         id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        branch_id TEXT NOT NULL,
         name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
@@ -45,6 +73,7 @@ export class TenantsService {
     await this.prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}"."teachers" (
         id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        branch_id TEXT,
         name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
@@ -58,6 +87,7 @@ export class TenantsService {
     await this.prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}"."classes" (
         id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        branch_id TEXT,
         name TEXT NOT NULL,
         grade TEXT,
         teacher_id TEXT REFERENCES "${schemaName}"."teachers"(id) ON DELETE SET NULL,
@@ -90,18 +120,31 @@ export class TenantsService {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+
+    await this.prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS idx_students_branch ON "${schemaName}"."students"(branch_id)`,
+    );
+    await this.prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS idx_students_status ON "${schemaName}"."students"(status)`,
+    );
   }
 
-  async getTenantStats(schemaName: string) {
+  async getTenantStats(schemaName: string, branchId?: string) {
+    const branchFilter = branchId ? `AND branch_id = '${branchId}'` : '';
+
     const [studentsResult, presentResult, paymentsResult] = await Promise.all([
       this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*) as count FROM "${schemaName}"."students" WHERE status = 'active'`
+        `SELECT COUNT(*) as count FROM "${schemaName}"."students" WHERE status = 'active' ${branchFilter}`,
       ),
       this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*) as count FROM "${schemaName}"."attendance" WHERE date = CURRENT_DATE AND status = 'present'`
+        `SELECT COUNT(*) as count FROM "${schemaName}"."attendance" a
+         JOIN "${schemaName}"."students" s ON s.id = a.student_id
+         WHERE a.date = CURRENT_DATE AND a.status = 'present' ${branchFilter}`,
       ),
       this.prisma.$queryRawUnsafe<[{ total: string }]>(
-        `SELECT COALESCE(SUM(amount), 0)::text as total FROM "${schemaName}"."payments" WHERE status = 'paid' AND DATE_TRUNC('month', paid_at) = DATE_TRUNC('month', NOW())`
+        `SELECT COALESCE(SUM(p.amount), 0)::text as total FROM "${schemaName}"."payments" p
+         JOIN "${schemaName}"."students" s ON s.id = p.student_id
+         WHERE p.status = 'paid' AND DATE_TRUNC('month', p.paid_at) = DATE_TRUNC('month', NOW()) ${branchFilter}`,
       ),
     ]);
 
