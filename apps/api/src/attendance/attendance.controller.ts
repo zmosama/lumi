@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthUser } from '../auth/strategies/jwt.strategy';
 import { AttendanceService } from './attendance.service';
 import { RecordAttendanceDto } from './dto/record-attendance.dto';
 
@@ -14,11 +15,11 @@ export class AttendanceController {
   @Get()
   @ApiOperation({ summary: 'Get attendance for a specific date' })
   getAttendance(
-    @Req() req: { user: { schemaName: string } },
+    @Req() req: { user: AuthUser },
     @Query('date') date?: string,
   ): Promise<unknown> {
     return this.attendanceService.getAttendance(
-      req.user.schemaName,
+      req.user.tenantId,
       date || new Date().toISOString().split('T')[0],
     );
   }
@@ -26,9 +27,9 @@ export class AttendanceController {
   @Post()
   @ApiOperation({ summary: 'Record attendance for students' })
   recordAttendance(
-    @Req() req: { user: { schemaName: string } },
+    @Req() req: { user: AuthUser },
     @Body() dto: RecordAttendanceDto,
   ): Promise<unknown> {
-    return this.attendanceService.recordAttendance(req.user.schemaName, dto);
+    return this.attendanceService.recordAttendance(req.user.tenantId, dto);
   }
 }

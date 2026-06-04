@@ -33,12 +33,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <aside className="w-56 bg-gray-900 text-white flex flex-col fixed h-full">
         <div className="p-5 border-b border-gray-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-accent rounded-[6px] flex items-center justify-center">
-              <GraduationCap size={16} className="text-white" />
+            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+              <p className="font-bold text-sm font-ibm text-accent-foreground">Lumi</p>
             </div>
             <div>
-              <p className="font-bold text-sm font-ibm text-accent">لومي</p>
-              <p className="text-gray-400 text-xs">لوحة الإدارة</p>
+              <p className="font-bold text-sm font-ibm text-accent">Lumi</p>
+              <p className="text-gray-400 text-xs">Admin Panel</p>
             </div>
           </div>
         </div>

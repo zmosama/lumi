@@ -9,6 +9,11 @@ import { login } from '@/lib/auth';
 import { GraduationCap, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+
 const loginSchema = z.object({
   subdomain: z.string().min(1, 'ادخل معرف المؤسسة'),
   email: z.string().email('بريد إلكتروني غير صالح'),
@@ -35,102 +40,106 @@ export default function LoginPage() {
     try {
       await login(data);
       router.push('/dashboard');
-    } catch {
-      setError('بيانات الدخول غير صحيحة، تحقق من المعرف والبريد وكلمة المرور');
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg || 'حدث خطأ في الاتصال. برجاء التأكد من تشغيل قاعدة البيانات (Docker).');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-[8px] mb-4 shadow-md">
-            <GraduationCap size={32} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-primary-600 font-ibm">لومي</h1>
-          <p className="text-gray-500 text-sm mt-1">نظام إدارة المدارس والسنترات</p>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      {/* Logo */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4 shadow-lg shadow-primary/20">
+          <GraduationCap size={32} className="text-primary-foreground" />
         </div>
+        <h1 className="text-4xl font-bold text-primary font-ibm">Lumi</h1>
+        <p className="text-muted-foreground text-sm mt-2">نظام إدارة المدارس والسنترات</p>
+      </div>
 
-        {/* Form */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">تسجيل الدخول</h2>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="label">معرف المؤسسة (Subdomain)</label>
-              <input
+      {/* Form */}
+      <Card className="w-full max-w-md shadow-xl border-border/50">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-semibold">تسجيل الدخول</CardTitle>
+          <CardDescription>أدخل بيانات مؤسستك للدخول إلى لوحة التحكم</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="subdomain">معرف المؤسسة (Subdomain)</Label>
+              <Input
+                id="subdomain"
                 {...register('subdomain')}
-                className="input"
                 placeholder="مثال: alnoor"
                 dir="ltr"
+                className="text-left"
               />
               {errors.subdomain && (
-                <p className="text-danger text-xs mt-1">{errors.subdomain.message}</p>
+                <p className="text-destructive text-xs">{errors.subdomain.message}</p>
               )}
             </div>
 
-            <div>
-              <label className="label">البريد الإلكتروني</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Input
+                id="email"
                 {...register('email')}
                 type="email"
-                className="input"
                 placeholder="admin@school.com"
                 dir="ltr"
+                className="text-left"
               />
               {errors.email && (
-                <p className="text-danger text-xs mt-1">{errors.email.message}</p>
+                <p className="text-destructive text-xs">{errors.email.message}</p>
               )}
             </div>
 
-            <div>
-              <label className="label">كلمة المرور</label>
+            <div className="space-y-2">
+              <Label htmlFor="password">كلمة المرور</Label>
               <div className="relative">
-                <input
+                <Input
+                  id="password"
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
-                  className="input pl-10"
                   placeholder="••••••••"
+                  className="pl-10"
+                  dir="ltr"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-danger text-xs mt-1">{errors.password.message}</p>
+                <p className="text-destructive text-xs">{errors.password.message}</p>
               )}
             </div>
 
             {error && (
-              <div className="bg-red-50 text-danger text-sm p-3 rounded-[4px]">{error}</div>
+              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md font-medium">
+                {error}
+              </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" className="w-full" disabled={isLoading} size="lg">
               {isLoading ? 'جاري الدخول...' : 'دخول'}
-            </button>
+            </Button>
           </form>
-
-          <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-500">
-              مؤسستك مش مسجلة؟{' '}
-              <Link href="/register" className="text-primary-600 font-medium hover:underline">
-                سجّل مجاناً
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter className="flex flex-col border-t p-6 mt-2">
+          <p className="text-sm text-muted-foreground text-center">
+            مؤسستك غير مسجلة؟{' '}
+            <Link href="/register" className="text-primary font-medium hover:underline">
+              سجّل مجاناً
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

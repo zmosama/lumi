@@ -25,7 +25,7 @@ export class StudentsController {
     @Query('page') page = '1',
     @Query('limit') limit = '20',
   ): Promise<unknown> {
-    return this.studentsService.findAll(req.user.schemaName, {
+    return this.studentsService.findAll(req.user.tenantId, {
       branchId,
       search,
       status,
@@ -37,13 +37,13 @@ export class StudentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get student by ID' })
   findOne(@Req() req: { user: AuthUser }, @Param('id') id: string): Promise<unknown> {
-    return this.studentsService.findOne(req.user.schemaName, id);
+    return this.studentsService.findOne(req.user.tenantId, id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new student' })
   create(@Req() req: { user: AuthUser }, @Body() dto: CreateStudentDto): Promise<unknown> {
-    return this.studentsService.create(req.user.schemaName, dto);
+    return this.studentsService.create(req.user.tenantId, dto);
   }
 
   @Patch(':id')
@@ -53,13 +53,13 @@ export class StudentsController {
     @Param('id') id: string,
     @Body() dto: UpdateStudentDto,
   ): Promise<unknown> {
-    return this.studentsService.update(req.user.schemaName, id, dto);
+    return this.studentsService.update(req.user.tenantId, id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Archive student (soft delete)' })
   remove(@Req() req: { user: AuthUser }, @Param('id') id: string): Promise<void> {
-    return this.studentsService.archive(req.user.schemaName, id);
+    return this.studentsService.archive(req.user.tenantId, id);
   }
 }

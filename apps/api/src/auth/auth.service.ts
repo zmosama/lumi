@@ -19,7 +19,7 @@ export class AuthService {
   async registerTenant(dto: RegisterTenantDto) {
     const { tenantName, subdomain, orgType, initialBranch, adminEmail, adminPassword, adminName } = dto;
 
-    const { id: tenantId, schemaName } = await this.tenantsService.provisionTenant({
+    const { id: tenantId } = await this.tenantsService.provisionTenant({
       name: tenantName,
       subdomain,
       orgType,
@@ -38,7 +38,7 @@ export class AuthService {
       data: { email: adminEmail, passwordHash, name: adminName, role: 'admin', tenantId },
     });
 
-    const tokens = this.generateTokens(user.id, tenantId, schemaName, user.role, orgType);
+    const tokens = this.generateTokens(user.id, tenantId, user.role, orgType);
 
     return {
       message: 'Tenant registered successfully',
@@ -70,7 +70,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user.id, tenant.id, tenant.schemaName, user.role, tenant.orgType);
+    const tokens = this.generateTokens(user.id, tenant.id, user.role, tenant.orgType);
 
     return {
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
@@ -79,8 +79,8 @@ export class AuthService {
     };
   }
 
-  private generateTokens(userId: string, tenantId: string, schemaName: string, role: string, orgType: string) {
-    const payload = { sub: userId, tenantId, schemaName, role, orgType };
+  private generateTokens(userId: string, tenantId: string, role: string, orgType: string) {
+    const payload = { sub: userId, tenantId, role, orgType };
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {

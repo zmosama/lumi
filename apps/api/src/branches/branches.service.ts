@@ -49,18 +49,22 @@ export class BranchesService {
     });
   }
 
-  async deactivate(tenantId: string, id: string, schemaName: string) {
+  async deactivate(tenantId: string, id: string) {
     const branch = await this.findOne(tenantId, id);
 
     if (branch.isMain) {
       throw new BadRequestException('لا يمكن حذف الفرع الرئيسي');
     }
 
-    const [studentsResult] = await this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-      `SELECT COUNT(*) as count FROM "${schemaName}"."students" WHERE branch_id = $1 AND status = 'active'`,
-      id,
-    );
-    if (Number(studentsResult.count) > 0) {
+    const activeStudentsCount = await this.prisma.student.count({
+      where: {
+        tenantId,
+        branchId: id,
+        status: 'active',
+      },
+    });
+
+    if (activeStudentsCount > 0) {
       throw new BadRequestException('لا يمكن حذف فرع به طلاب نشطون — انقل الطلاب أولاً');
     }
 

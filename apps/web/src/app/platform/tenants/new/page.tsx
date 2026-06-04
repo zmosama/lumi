@@ -8,6 +8,10 @@ import { z } from 'zod';
 import { platformApi } from '@/lib/platform-auth';
 import { ArrowRight, Building2 } from 'lucide-react';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const schema = z.object({
   tenantName: z.string().min(2, 'اسم المؤسسة مطلوب'),
@@ -72,162 +76,160 @@ export default function NewTenantPage() {
     }
   };
 
-  const inputClass =
-    'w-full border border-gray-200 rounded-[6px] px-3 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500';
-  const labelClass = 'block text-sm font-medium text-gray-700 mb-1';
-  const errorClass = 'text-red-500 text-xs mt-1';
+  const selectClass = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto pb-12">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/platform/tenants" className="text-gray-400 hover:text-gray-600">
+        <Link href="/platform/tenants" className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowRight size={20} />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <Building2 size={20} />
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Building2 size={24} className="text-primary" />
             إضافة مؤسسة جديدة
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">أنشئ مؤسسة للعميل مع حساب الأدمن</p>
+          <p className="text-muted-foreground text-sm mt-1">أنشئ مؤسسة للعميل مع حساب الأدمن الأساسي</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Section 1: Tenant info */}
-        <div className="bg-white border border-gray-200 rounded-[8px] p-5">
-          <h2 className="font-semibold text-gray-700 mb-4 text-sm uppercase tracking-wide">
-            بيانات المؤسسة
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className={labelClass}>اسم المؤسسة</label>
-              <input
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">بيانات المؤسسة</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>اسم المؤسسة</Label>
+              <Input
                 {...register('tenantName')}
-                className={inputClass}
                 placeholder="مدرسة النور الدولية"
               />
-              {errors.tenantName && <p className={errorClass}>{errors.tenantName.message}</p>}
+              {errors.tenantName && <p className="text-destructive text-xs">{errors.tenantName.message}</p>}
             </div>
 
-            <div>
-              <label className={labelClass}>Subdomain</label>
-              <input
+            <div className="space-y-2">
+              <Label>المجال الفرعي (Subdomain)</Label>
+              <Input
                 {...register('subdomain')}
-                className={inputClass}
                 placeholder="alnoor"
                 dir="ltr"
+                className="text-left"
               />
-              {errors.subdomain && <p className={errorClass}>{errors.subdomain.message}</p>}
-              <p className="text-gray-400 text-xs mt-1">
-                الرابط سيكون: <span dir="ltr">[subdomain].lumi.app</span>
+              {errors.subdomain && <p className="text-destructive text-xs">{errors.subdomain.message}</p>}
+              <p className="text-muted-foreground text-xs">
+                رابط الدخول سيكون: <span dir="ltr" className="font-mono text-primary">[subdomain].lumi.app</span>
               </p>
             </div>
 
-            <div>
-              <label className={labelClass}>نوع المؤسسة</label>
-              <select {...register('orgType')} className={inputClass}>
+            <div className="space-y-2">
+              <Label>نوع المؤسسة</Label>
+              <select {...register('orgType')} className={selectClass}>
                 {orgTypeOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
               </select>
-              {errors.orgType && <p className={errorClass}>{errors.orgType.message}</p>}
+              {errors.orgType && <p className="text-destructive text-xs">{errors.orgType.message}</p>}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Section 2: Initial branch */}
-        <div className="bg-white border border-gray-200 rounded-[8px] p-5">
-          <h2 className="font-semibold text-gray-700 mb-4 text-sm uppercase tracking-wide">
-            الفرع الأول
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className={labelClass}>اسم الفرع</label>
-              <input
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">الفرع الأول</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>اسم الفرع</Label>
+              <Input
                 {...register('branchName')}
-                className={inputClass}
                 placeholder="الفرع الرئيسي"
               />
-              {errors.branchName && <p className={errorClass}>{errors.branchName.message}</p>}
+              {errors.branchName && <p className="text-destructive text-xs">{errors.branchName.message}</p>}
             </div>
 
-            <div>
-              <label className={labelClass}>المنطقة (اختياري)</label>
-              <input
+            <div className="space-y-2">
+              <Label>المنطقة (اختياري)</Label>
+              <Input
                 {...register('branchArea')}
-                className={inputClass}
                 placeholder="المعادي"
               />
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Section 3: Admin account */}
-        <div className="bg-white border border-gray-200 rounded-[8px] p-5">
-          <h2 className="font-semibold text-gray-700 mb-4 text-sm uppercase tracking-wide">
-            حساب الأدمن
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className={labelClass}>الاسم</label>
-              <input
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">بيانات حساب الأدمن</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>الاسم</Label>
+              <Input
                 {...register('adminName')}
-                className={inputClass}
                 placeholder="أحمد محمد"
               />
-              {errors.adminName && <p className={errorClass}>{errors.adminName.message}</p>}
+              {errors.adminName && <p className="text-destructive text-xs">{errors.adminName.message}</p>}
             </div>
 
-            <div>
-              <label className={labelClass}>البريد الإلكتروني</label>
-              <input
+            <div className="space-y-2">
+              <Label>البريد الإلكتروني</Label>
+              <Input
                 {...register('adminEmail')}
                 type="email"
-                className={inputClass}
                 placeholder="admin@alnoor.com"
                 dir="ltr"
+                className="text-left"
               />
-              {errors.adminEmail && <p className={errorClass}>{errors.adminEmail.message}</p>}
+              {errors.adminEmail && <p className="text-destructive text-xs">{errors.adminEmail.message}</p>}
             </div>
 
-            <div>
-              <label className={labelClass}>كلمة المرور</label>
-              <input
+            <div className="space-y-2">
+              <Label>كلمة المرور</Label>
+              <Input
                 {...register('adminPassword')}
                 type="password"
-                className={inputClass}
                 placeholder="••••••••"
+                dir="ltr"
+                className="text-left"
               />
               {errors.adminPassword && (
-                <p className={errorClass}>{errors.adminPassword.message}</p>
+                <p className="text-destructive text-xs">{errors.adminPassword.message}</p>
               )}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-[6px]">
+          <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-md font-medium border border-destructive/20">
             {error}
           </div>
         )}
 
-        <div className="flex gap-3">
-          <button
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <Button
             type="submit"
             disabled={isLoading}
-            className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-[6px] text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex-1"
           >
             {isLoading ? 'جاري الإنشاء...' : 'إنشاء المؤسسة'}
-          </button>
-          <Link
-            href="/platform/tenants"
-            className="px-6 py-2.5 border border-gray-200 rounded-[6px] text-sm text-gray-600 hover:bg-gray-50 transition-colors text-center"
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            asChild
+            className="sm:w-32"
           >
-            إلغاء
-          </Link>
+            <Link href="/platform/tenants">
+              إلغاء
+            </Link>
+          </Button>
         </div>
       </form>
     </div>

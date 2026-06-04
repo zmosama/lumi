@@ -6,6 +6,9 @@ import { Student } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { ArrowRight, User, Phone, GraduationCap, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
   params: { id: string };
@@ -13,9 +16,9 @@ interface Props {
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
-      <span className="text-gray-500 text-sm w-32 flex-shrink-0">{label}</span>
-      <span className="text-gray-800 text-sm font-medium">{value || '—'}</span>
+    <div className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
+      <span className="text-muted-foreground text-sm w-32 flex-shrink-0">{label}</span>
+      <span className="text-foreground text-sm font-medium">{value || '—'}</span>
     </div>
   );
 }
@@ -31,41 +34,46 @@ export default function StudentDetailPage({ params }: Props) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 bg-gray-100 animate-pulse rounded" />
-        <div className="card h-64 animate-pulse" />
+      <div className="space-y-6">
+        <div className="h-8 w-48 bg-muted animate-pulse rounded-md" />
+        <Card className="h-64 animate-pulse" />
       </div>
     );
   }
 
   if (!student) {
     return (
-      <div className="card text-center py-12">
-        <p className="text-gray-400">الطالب غير موجود</p>
-        <Link href="/students" className="text-primary-600 text-sm mt-2 inline-block hover:underline">
-          العودة لقائمة الطلاب
-        </Link>
-      </div>
+      <Card>
+        <CardContent className="text-center py-16">
+          <p className="text-muted-foreground mb-4">الطالب غير موجود</p>
+          <Button asChild variant="outline">
+            <Link href="/students">
+              العودة لقائمة الطلاب
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3">
         <Link
           href="/students"
-          className="flex items-center gap-1 text-gray-400 hover:text-primary-600 transition-colors"
+          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
         >
           <ArrowRight size={18} />
-          <span className="text-sm">الطلاب</span>
+          <span className="text-sm font-medium">الطلاب</span>
         </Link>
-        <span className="text-gray-300">/</span>
-        <h1 className="text-xl font-bold text-gray-800">{student.name}</h1>
+        <span className="text-border">/</span>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">{student.name}</h1>
         <span
-          className={
-            student.status === 'active' ? 'badge-success' : 'badge-gray'
-          }
+          className={cn(
+            'text-xs px-2.5 py-1 rounded-full font-medium',
+            student.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'
+          )}
         >
           {student.status === 'active' ? 'نشط' : 'غير نشط'}
         </span>
@@ -73,60 +81,68 @@ export default function StudentDetailPage({ params }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main info */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                <User size={24} className="text-primary-600" />
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User size={28} className="text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg text-foreground">{student.name}</h2>
+                  <p className="text-sm text-muted-foreground">{student.grade || 'لم يحدد الصف'}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">{student.name}</h2>
-                <p className="text-sm text-gray-500">{student.grade || 'لم يحدد الصف'}</p>
-              </div>
-            </div>
 
-            <div>
-              <InfoRow label="الصف الدراسي" value={student.grade} />
-              <InfoRow label="المجموعة" value={student.class_name} />
-              <InfoRow label="رقم الهاتف" value={student.phone} />
-              <InfoRow label="البريد الإلكتروني" value={student.email} />
-              <InfoRow label="ملاحظات" value={student.notes} />
-              <InfoRow label="تاريخ الإضافة" value={formatDate(student.created_at)} />
-            </div>
-          </div>
+              <div>
+                <InfoRow label="الصف الدراسي" value={student.grade} />
+                <InfoRow label="المجموعة" value={student.class_name} />
+                <InfoRow label="رقم الهاتف" value={student.phone} />
+                <InfoRow label="البريد الإلكتروني" value={student.email} />
+                <InfoRow label="ملاحظات" value={student.notes} />
+                <InfoRow label="تاريخ الإضافة" value={formatDate(student.created_at)} />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Side info */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Parent info */}
-          <div className="card">
-            <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <Phone size={16} className="text-gray-400" />
-              بيانات ولي الأمر
-            </h3>
-            <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Phone size={18} className="text-muted-foreground" />
+                بيانات ولي الأمر
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <InfoRow label="الاسم" value={student.parent_name} />
               <InfoRow label="الهاتف" value={student.parent_phone} />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Quick stats */}
-          <div className="card">
-            <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" />
-              ملخص سريع
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 bg-gray-50 rounded-[8px]">
-                <p className="text-lg font-bold text-success">—</p>
-                <p className="text-xs text-gray-500">أيام الحضور</p>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Calendar size={18} className="text-muted-foreground" />
+                ملخص سريع
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-xl font-bold text-green-600">—</p>
+                  <p className="text-xs text-muted-foreground mt-1">أيام الحضور</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-xl font-bold text-destructive">—</p>
+                  <p className="text-xs text-muted-foreground mt-1">أيام الغياب</p>
+                </div>
               </div>
-              <div className="text-center p-3 bg-gray-50 rounded-[8px]">
-                <p className="text-lg font-bold text-danger">—</p>
-                <p className="text-xs text-gray-500">أيام الغياب</p>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

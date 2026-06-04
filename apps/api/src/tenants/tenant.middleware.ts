@@ -6,7 +6,6 @@ export interface TenantRequest extends Request {
   tenant?: {
     id: string;
     name: string;
-    schemaName: string;
     subdomain: string;
   };
 }
@@ -37,7 +36,7 @@ export class TenantMiddleware implements NestMiddleware {
 
     const tenant = await this.prisma.tenant.findUnique({
       where: { subdomain, isActive: true },
-      select: { id: true, name: true, schemaName: true, subdomain: true },
+      select: { id: true, name: true, subdomain: true },
     });
 
     if (!tenant) {

@@ -48,6 +48,6 @@ export class BranchesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Deactivate a branch (only if no active students)' })
   deactivate(@Req() req: { user: AuthUser }, @Param('id') id: string): Promise<void> {
-    return this.branchesService.deactivate(req.user.tenantId, id, req.user.schemaName);
+    return this.branchesService.deactivate(req.user.tenantId, id);
   }
 }

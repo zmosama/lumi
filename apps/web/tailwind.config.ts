@@ -10,8 +10,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
+        background: "hsl(var(--background) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: '#1B4F72',
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
           50: '#EBF5FB',
           100: '#D6EAF8',
           200: '#AED6F1',
@@ -24,23 +30,31 @@ const config: Config = {
           900: '#071723',
         },
         secondary: {
-          DEFAULT: '#2E86C1',
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: '#F39C12',
-          50: '#FEF9E7',
-          100: '#FDEBD0',
-          200: '#FAD7A0',
-          300: '#F8C471',
-          400: '#F5B041',
-          500: '#F39C12',
-          600: '#D68910',
-          700: '#B7770D',
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card) / <alpha-value>)",
+          foreground: "hsl(var(--card-foreground) / <alpha-value>)",
         },
         success: '#27AE60',
         danger: '#E74C3C',
-        background: '#F8F9FA',
-        card: '#FFFFFF',
       },
       fontFamily: {
         cairo: ['Cairo', 'sans-serif'],

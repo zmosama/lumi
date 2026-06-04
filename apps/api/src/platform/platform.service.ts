@@ -74,7 +74,7 @@ export class PlatformService {
   async createTenantForClient(dto: CreateTenantPlatformDto) {
     const { tenantName, subdomain, orgType, initialBranch, adminEmail, adminPassword, adminName } = dto;
 
-    const { id: tenantId, schemaName } = await this.tenantsService.provisionTenant({
+    const { id: tenantId } = await this.tenantsService.provisionTenant({
       name: tenantName,
       subdomain,
       orgType,

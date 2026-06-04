@@ -17,6 +17,6 @@ export class DashboardController {
     @Req() req: { user: AuthUser },
     @Query('branchId') branchId?: string,
   ): Promise<unknown> {
-    return this.tenantsService.getTenantStats(req.user.schemaName, branchId);
+    return this.tenantsService.getTenantStats(req.user.tenantId, branchId);
   }
 }

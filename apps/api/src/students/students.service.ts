@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { StudentRecord } from '../types/api.types';
+import { Student } from '@prisma/client';
 
-export type { StudentRecord };
+export type StudentRecord = Student;
 
 interface FindAllOptions {
   search?: string;
@@ -18,106 +18,105 @@ interface FindAllOptions {
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(schemaName: string, options: FindAllOptions) {
+  async findAll(tenantId: string, options: FindAllOptions) {
     const { search, status, branchId, page, limit } = options;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-    let whereClause = `WHERE 1=1`;
-    const params: unknown[] = [];
+    const where: any = {
+      tenantId,
+    };
 
     if (branchId) {
-      params.push(branchId);
-      whereClause += ` AND branch_id = $${params.length}`;
+      where.branchId = branchId;
     }
 
     if (status) {
-      params.push(status);
-      whereClause += ` AND status = $${params.length}`;
+      where.status = status;
     } else {
-      whereClause += ` AND status != 'archived'`;
+      where.status = { not: 'archived' };
     }
 
     if (search) {
-      params.push(`%${search}%`);
-      whereClause += ` AND (name ILIKE $${params.length} OR phone ILIKE $${params.length} OR parent_phone ILIKE $${params.length})`;
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { parentPhone: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
-    params.push(limit, offset);
-
-    const students = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
-      `SELECT * FROM "${schemaName}"."students" ${whereClause} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`,
-      ...params,
-    );
-
-    const countParams = params.slice(0, -2);
-    const countResult = await this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-      `SELECT COUNT(*) as count FROM "${schemaName}"."students" ${whereClause}`,
-      ...countParams,
-    );
+    const [students, total] = await Promise.all([
+      this.prisma.student.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.student.count({ where }),
+    ]);
 
     return {
       data: students,
       meta: {
-        total: Number(countResult[0]?.count || 0),
+        total,
         page,
         limit,
-        totalPages: Math.ceil(Number(countResult[0]?.count || 0) / limit),
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
 
-  async findOne(schemaName: string, id: string): Promise<StudentRecord> {
-    const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
-      `SELECT * FROM "${schemaName}"."students" WHERE id = $1`,
-      id,
-    );
-    if (!results[0]) {
+  async findOne(tenantId: string, id: string): Promise<StudentRecord> {
+    const student = await this.prisma.student.findFirst({
+      where: { id, tenantId },
+    });
+    if (!student) {
       throw new NotFoundException('Student not found');
     }
-    return results[0];
+    return student;
   }
 
-  async create(schemaName: string, dto: CreateStudentDto): Promise<StudentRecord> {
-    const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
-      `INSERT INTO "${schemaName}"."students"
-         (branch_id, name, email, phone, parent_name, parent_phone, grade, class_name, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      dto.branchId, dto.name, dto.email || null, dto.phone || null, dto.parentName || null,
-      dto.parentPhone || null, dto.grade || null, dto.className || null, dto.notes || null,
-    );
-    return results[0];
+  async create(tenantId: string, dto: CreateStudentDto): Promise<StudentRecord> {
+    return this.prisma.student.create({
+      data: {
+        tenantId,
+        branchId: dto.branchId,
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        parentName: dto.parentName,
+        parentPhone: dto.parentPhone,
+        grade: dto.grade,
+        className: dto.className,
+        notes: dto.notes,
+      },
+    });
   }
 
-  async update(schemaName: string, id: string, dto: UpdateStudentDto): Promise<StudentRecord> {
-    await this.findOne(schemaName, id);
+  async update(tenantId: string, id: string, dto: UpdateStudentDto): Promise<StudentRecord> {
+    await this.findOne(tenantId, id);
 
-    const results = await this.prisma.$queryRawUnsafe<StudentRecord[]>(
-      `UPDATE "${schemaName}"."students"
-       SET branch_id    = COALESCE($2, branch_id),
-           name         = COALESCE($3, name),
-           email        = COALESCE($4, email),
-           phone        = COALESCE($5, phone),
-           parent_name  = COALESCE($6, parent_name),
-           parent_phone = COALESCE($7, parent_phone),
-           grade        = COALESCE($8, grade),
-           class_name   = COALESCE($9, class_name),
-           notes        = COALESCE($10, notes),
-           updated_at   = NOW()
-       WHERE id = $1
-       RETURNING *`,
-      id, dto.branchId || null, dto.name || null, dto.email || null, dto.phone || null,
-      dto.parentName || null, dto.parentPhone || null, dto.grade || null,
-      dto.className || null, dto.notes || null,
-    );
-    return results[0];
+    return this.prisma.student.update({
+      where: { id },
+      data: {
+        branchId: dto.branchId,
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        parentName: dto.parentName,
+        parentPhone: dto.parentPhone,
+        grade: dto.grade,
+        className: dto.className,
+        notes: dto.notes,
+      },
+    });
   }
 
-  async archive(schemaName: string, id: string): Promise<void> {
-    await this.findOne(schemaName, id);
-    await this.prisma.$executeRawUnsafe(
-      `UPDATE "${schemaName}"."students" SET status = 'archived', updated_at = NOW() WHERE id = $1`,
-      id,
-    );
+  async archive(tenantId: string, id: string): Promise<void> {
+    await this.findOne(tenantId, id);
+    
+    await this.prisma.student.update({
+      where: { id },
+      data: { status: 'archived' },
+    });
   }
 }

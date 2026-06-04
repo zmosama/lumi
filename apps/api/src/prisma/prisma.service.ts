@@ -11,10 +11,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 
-  async withTenantSchema<T>(schemaName: string, fn: (prisma: PrismaClient) => Promise<T>): Promise<T> {
-    return this.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(`SET search_path = "${schemaName}", public`);
-      return fn(tx as unknown as PrismaClient);
-    });
-  }
+  // Row-level multi-tenancy no longer requires dynamic search_paths
 }

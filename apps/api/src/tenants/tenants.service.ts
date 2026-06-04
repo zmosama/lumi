@@ -20,9 +20,8 @@ export class TenantsService {
 
   async provisionTenant(
     opts: ProvisionOptions,
-  ): Promise<{ id: string; schemaName: string; branchId: string }> {
+  ): Promise<{ id: string; branchId: string }> {
     const { name, subdomain, orgType, initialBranch } = opts;
-    const schemaName = `tenant_${subdomain.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
     const existing = await this.prisma.tenant.findUnique({ where: { subdomain } });
     if (existing) {
@@ -30,7 +29,7 @@ export class TenantsService {
     }
 
     const tenant = await this.prisma.tenant.create({
-      data: { name, subdomain, schemaName, orgType },
+      data: { name, subdomain, orgType },
     });
 
     const branch = await this.prisma.branch.create({
@@ -44,114 +43,42 @@ export class TenantsService {
       },
     });
 
-    await this.createTenantSchema(schemaName);
-
-    return { id: tenant.id, schemaName, branchId: branch.id };
+    return { id: tenant.id, branchId: branch.id };
   }
 
-  private async createTenantSchema(schemaName: string): Promise<void> {
-    await this.prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
+  async getTenantStats(tenantId: string, branchId?: string) {
+    const branchFilter = branchId ? { branchId } : {};
 
-    await this.prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "${schemaName}"."students" (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        branch_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        email TEXT,
-        phone TEXT,
-        parent_name TEXT,
-        parent_phone TEXT,
-        grade TEXT,
-        class_name TEXT,
-        status TEXT NOT NULL DEFAULT 'active',
-        notes TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await this.prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "${schemaName}"."teachers" (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        branch_id TEXT,
-        name TEXT NOT NULL,
-        email TEXT,
-        phone TEXT,
-        subject TEXT,
-        status TEXT NOT NULL DEFAULT 'active',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await this.prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "${schemaName}"."classes" (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        branch_id TEXT,
-        name TEXT NOT NULL,
-        grade TEXT,
-        teacher_id TEXT REFERENCES "${schemaName}"."teachers"(id) ON DELETE SET NULL,
-        capacity INTEGER DEFAULT 30,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await this.prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "${schemaName}"."attendance" (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        student_id TEXT NOT NULL REFERENCES "${schemaName}"."students"(id) ON DELETE CASCADE,
-        date DATE NOT NULL,
-        status TEXT NOT NULL DEFAULT 'present',
-        notes TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        UNIQUE(student_id, date)
-      )
-    `);
-
-    await this.prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "${schemaName}"."payments" (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        student_id TEXT NOT NULL REFERENCES "${schemaName}"."students"(id) ON DELETE CASCADE,
-        amount DECIMAL(10,2) NOT NULL,
-        description TEXT,
-        status TEXT NOT NULL DEFAULT 'paid',
-        paid_at TIMESTAMPTZ,
-        due_date DATE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await this.prisma.$executeRawUnsafe(
-      `CREATE INDEX IF NOT EXISTS idx_students_branch ON "${schemaName}"."students"(branch_id)`,
-    );
-    await this.prisma.$executeRawUnsafe(
-      `CREATE INDEX IF NOT EXISTS idx_students_status ON "${schemaName}"."students"(status)`,
-    );
-  }
-
-  async getTenantStats(schemaName: string, branchId?: string) {
-    const branchFilter = branchId ? `AND branch_id = '${branchId}'` : '';
-
-    const [studentsResult, presentResult, paymentsResult] = await Promise.all([
-      this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*) as count FROM "${schemaName}"."students" WHERE status = 'active' ${branchFilter}`,
-      ),
-      this.prisma.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*) as count FROM "${schemaName}"."attendance" a
-         JOIN "${schemaName}"."students" s ON s.id = a.student_id
-         WHERE a.date = CURRENT_DATE AND a.status = 'present' ${branchFilter}`,
-      ),
-      this.prisma.$queryRawUnsafe<[{ total: string }]>(
-        `SELECT COALESCE(SUM(p.amount), 0)::text as total FROM "${schemaName}"."payments" p
-         JOIN "${schemaName}"."students" s ON s.id = p.student_id
-         WHERE p.status = 'paid' AND DATE_TRUNC('month', p.paid_at) = DATE_TRUNC('month', NOW()) ${branchFilter}`,
-      ),
+    const [totalStudents, presentToday, paymentsResult] = await Promise.all([
+      this.prisma.student.count({
+        where: { tenantId, status: 'active', ...branchFilter },
+      }),
+      this.prisma.attendance.count({
+        where: {
+          tenantId,
+          date: new Date(new Date().setHours(0, 0, 0, 0)),
+          status: 'present',
+          student: branchFilter,
+        },
+      }),
+      this.prisma.payment.aggregate({
+        _sum: { amount: true },
+        where: {
+          tenantId,
+          status: 'paid',
+          paidAt: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          },
+          student: branchFilter,
+        },
+      }),
     ]);
 
     return {
-      totalStudents: Number(studentsResult[0]?.count || 0),
-      presentToday: Number(presentResult[0]?.count || 0),
-      monthlyRevenue: parseFloat(paymentsResult[0]?.total || '0'),
+      totalStudents,
+      presentToday,
+      monthlyRevenue: Number(paymentsResult._sum.amount || 0),
     };
   }
 }
+
