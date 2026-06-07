@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { I18nContext } from 'nestjs-i18n';
+import { I18nService } from 'nestjs-i18n';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     config: ConfigService,
     private prisma: PrismaService,
+    private i18n: I18nService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -44,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user || !user.tenant.isActive) {
-      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.user_not_active'));
+      throw new UnauthorizedException(this.i18n.t('messages.auth.user_not_active'));
     }
 
     return {

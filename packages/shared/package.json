@@ -2,9 +2,15 @@
   "name": "@lumi/shared",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
     "lint": "echo 'No lint for shared'"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^5.0.0"
   }
 }

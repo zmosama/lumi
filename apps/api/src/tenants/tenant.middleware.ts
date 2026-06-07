@@ -1,4 +1,4 @@
-import { I18nContext } from 'nestjs-i18n';
+import { I18nService } from 'nestjs-i18n';
 import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,7 +14,10 @@ export interface TenantRequest extends Request {
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private i18n: I18nService,
+  ) {}
 
   async use(req: TenantRequest, res: Response, next: NextFunction) {
     // For local dev: use x-tenant-id header
@@ -33,7 +36,7 @@ export class TenantMiddleware implements NestMiddleware {
     }
 
     if (!subdomain) {
-      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
+      throw new NotFoundException(this.i18n.t('messages.tenant.not_found'));
     }
 
     const tenant = await this.prisma.tenant.findUnique({
@@ -42,7 +45,7 @@ export class TenantMiddleware implements NestMiddleware {
     });
 
     if (!tenant) {
-      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
+      throw new NotFoundException(this.i18n.t('messages.tenant.not_found'));
     }
 
     req.tenant = tenant;

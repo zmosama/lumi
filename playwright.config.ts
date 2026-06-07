@@ -23,6 +23,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Set default locale for tests so next-intl middleware defaults to Arabic */
+    locale: 'ar-EG',
   },
 
   /* Configure projects for major browsers */
@@ -34,19 +37,4 @@ export default defineConfig({
     // We can add Firefox or WebKit later if needed
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'pnpm --filter api run dev',
-      url: 'http://localhost:3001/api/docs',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'pnpm --filter web run dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    }
-  ],
 });

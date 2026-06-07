@@ -3,72 +3,60 @@ import { I18nContext } from 'nestjs-i18n';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+import { BranchesDomainService } from '@lumi/domain';
 
 @Injectable()
 export class BranchesService {
-  constructor(private prisma: PrismaService) {}
+  private domainService: BranchesDomainService;
+
+  constructor(private prisma: PrismaService) {
+    this.domainService = new BranchesDomainService(this.prisma);
+  }
 
   async findAll(tenantId: string) {
-    return this.prisma.branch.findMany({
-      where: { tenantId, isActive: true },
-      orderBy: [{ isMain: 'desc' }, { createdAt: 'asc' }],
-    });
+    return this.domainService.findAllBranches(tenantId);
   }
 
   async findOne(tenantId: string, id: string) {
-    const branch = await this.prisma.branch.findFirst({
-      where: { id, tenantId, isActive: true },
-    });
-    if (!branch) throw new NotFoundException(I18nContext.current()!.t('messages.branch.not_found'));
-    return branch;
+    try {
+      return await this.domainService.findBranchById(tenantId, id);
+    } catch (e: any) {
+      if (e.message === 'Branch not found') {
+        throw new NotFoundException(I18nContext.current()!.t('messages.branch.not_found'));
+      }
+      throw e;
+    }
   }
 
   async create(tenantId: string, dto: CreateBranchDto) {
-    return this.prisma.branch.create({
-      data: {
-        tenantId,
-        name: dto.name,
-        area: dto.area,
-        curriculums: dto.curriculums ?? [],
-        ownership: dto.ownership,
-        isMain: dto.isMain ?? false,
-      },
-    });
+    return this.domainService.createBranch(tenantId, dto);
   }
 
   async update(tenantId: string, id: string, dto: UpdateBranchDto) {
-    await this.findOne(tenantId, id);
-    return this.prisma.branch.update({
-      where: { id },
-      data: {
-        name: dto.name,
-        area: dto.area,
-        curriculums: dto.curriculums,
-        ownership: dto.ownership,
-        isMain: dto.isMain,
-      },
-    });
+    try {
+      return await this.domainService.updateBranch(tenantId, id, dto);
+    } catch (e: any) {
+      if (e.message === 'Branch not found') {
+        throw new NotFoundException(I18nContext.current()!.t('messages.branch.not_found'));
+      }
+      throw e;
+    }
   }
 
   async deactivate(tenantId: string, id: string) {
-    const branch = await this.findOne(tenantId, id);
-
-    if (branch.isMain) {
-      throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_main_error'));
+    try {
+      await this.domainService.deactivateBranch(tenantId, id);
+    } catch (e: any) {
+      if (e.message === 'Branch not found') {
+        throw new NotFoundException(I18nContext.current()!.t('messages.branch.not_found'));
+      }
+      if (e.message === 'BRANCH_DELETE_MAIN_ERROR') {
+        throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_main_error'));
+      }
+      if (e.message === 'BRANCH_DELETE_ACTIVE_STUDENTS_ERROR') {
+        throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_active_students_error'));
+      }
+      throw e;
     }
-
-    const activeStudentsCount = await this.prisma.student.count({
-      where: {
-        tenantId,
-        branchId: id,
-        status: 'active',
-      },
-    });
-
-    if (activeStudentsCount > 0) {
-      throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_active_students_error'));
-    }
-
-    await this.prisma.branch.update({ where: { id }, data: { isActive: false } });
   }
 }

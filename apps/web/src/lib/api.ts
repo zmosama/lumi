@@ -20,7 +20,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login');
+    if (error.response?.status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
       localStorage.removeItem('tenant_subdomain');
       window.location.href = '/login';

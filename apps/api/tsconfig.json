@@ -16,9 +16,6 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@lumi/shared": ["../../packages/shared/src"]
-    }
+    "noFallthroughCasesInSwitch": true
   }
 }

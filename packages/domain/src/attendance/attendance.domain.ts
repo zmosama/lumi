@@ -1,7 +1,8 @@
-// Pure TypeScript Domain Logic
 export interface AttendanceRepository {
-  findMany(params: any): Promise<any>;
-  upsert(params: any): Promise<any>;
+  attendance: {
+    findMany(params: any): Promise<any>;
+    upsert(params: any): Promise<any>;
+  };
   $transaction(promises: any[]): Promise<any[]>;
 }
 
@@ -19,7 +20,7 @@ export class AttendanceDomainService {
 
   async getAttendanceForDate(date: string) {
     const parsedDate = new Date(date);
-    return this.repo.findMany({
+    return this.repo.attendance.findMany({
       where: { date: parsedDate },
       include: {
         student: { select: { name: true } }
@@ -39,7 +40,7 @@ export class AttendanceDomainService {
     let count = 0;
     const promises = payload.records.map((record) => {
       count++;
-      return this.repo.upsert({
+      return this.repo.attendance.upsert({
         where: {
           studentId_date: {
             studentId: record.studentId,

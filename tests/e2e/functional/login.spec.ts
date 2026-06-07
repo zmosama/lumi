@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Login & Usability - Functional', () => {
   test('should display the login page with correct Arabic RTL layout by default', async ({ page }) => {
     // Go to default root which should redirect to /ar-EG or show default
-    await page.goto('/ar-EG/login');
+    await page.goto('/login');
     
     // Check if the dir is rtl
     const htmlElement = await page.locator('html');
@@ -29,7 +29,7 @@ test.describe('Login & Usability - Functional', () => {
   });
 
   test('Abnormal Scenario: Login with incorrect credentials should fail', async ({ page }) => {
-    await page.goto('/ar-EG/login');
+    await page.goto('/login');
     await page.fill('input[name="subdomain"]', 'invalid-tenant');
     await page.fill('input[name="email"]', 'wrong@school.com');
     await page.fill('input[name="password"]', 'badpassword');

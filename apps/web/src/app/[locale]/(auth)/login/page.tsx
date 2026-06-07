@@ -74,7 +74,7 @@ export default function LoginPage() {
           <CardDescription>{t('login_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div className="space-y-2">
               <Label htmlFor="subdomain">{t('subdomain_label')}</Label>
               <Input

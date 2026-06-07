@@ -35,7 +35,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
                      (args as any).data.tenantId = tenantId;
                    }
                 } else if (Array.isArray((args as any).data)) {
-                   (args as any).data.forEach(d => {
+                   (args as any).data.forEach((d: any) => {
                      if (!d.tenantId) d.tenantId = tenantId;
                    });
                 }
