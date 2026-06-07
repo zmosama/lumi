@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "E-posta zaten kayıtlı",
+    "email_registered_tenant": "E-posta bu kiracı için zaten kayıtlı",
+    "invalid_credentials": "Geçersiz kimlik bilgileri",
+    "access_denied": "Erişim reddedildi",
+    "missing_platform_token": "Platform belirteci eksik",
+    "invalid_platform_token": "Geçersiz platform belirteci",
+    "not_platform_token": "Platform belirteci değil",
+    "only_owner": "Sadece SAHİBİ bu işlemi gerçekleştirebilir",
+    "user_not_active": "Kullanıcı veya kiracı artık aktif değil"
+  },
+  "tenant": {
+    "subdomain_taken": "Alt alan adı zaten alınmış",
+    "not_found": "Kiracı bulunamadı"
+  },
+  "branch": {
+    "not_found": "Şube bulunamadı",
+    "delete_main_error": "Ana şube silinemez",
+    "delete_active_students_error": "Aktif öğrencileri olan bir şube silinemez — önce onları taşıyın"
+  },
+  "student": {
+    "not_found": "Öğrenci bulunamadı"
+  }
+}

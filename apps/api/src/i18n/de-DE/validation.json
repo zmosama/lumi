@@ -1,0 +1,14 @@
+{
+  "isEmail": "Die $property muss eine gültige E-Mail-Adresse sein.",
+  "isNotEmpty": "Die $property darf nicht leer sein.",
+  "isString": "Die $property muss eine Zeichenfolge sein.",
+  "minLength": "Die $property muss mindestens $constraint1 Zeichen lang sein.",
+  "maxLength": "Die $property darf höchstens $constraint1 Zeichen lang sein.",
+  "matches": "Das Format von $property ist ungültig.",
+  "isEnum": "Die $property muss ein gültiger Enum-Wert sein.",
+  "isDateString": "Die $property muss eine gültige Datumszeichenfolge sein.",
+  "isArray": "Die $property muss ein Array sein.",
+  "isIn": "Die $property muss einer der folgenden Werte sein: $constraint1.",
+  "isNumber": "Die $property muss eine Zahl sein.",
+  "isBoolean": "Die $property muss ein boolescher Wert sein."
+}

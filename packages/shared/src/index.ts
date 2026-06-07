@@ -26,3 +26,5 @@ export type StudentStatus = 'active' | 'inactive' | 'archived';
 export type AttendanceStatus = 'present' | 'absent' | 'late';
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue';
+
+export * from './als';

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { I18nContext } from 'nestjs-i18n';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
@@ -18,7 +19,7 @@ export class BranchesService {
     const branch = await this.prisma.branch.findFirst({
       where: { id, tenantId, isActive: true },
     });
-    if (!branch) throw new NotFoundException('Branch not found');
+    if (!branch) throw new NotFoundException(I18nContext.current()!.t('messages.branch.not_found'));
     return branch;
   }
 
@@ -53,7 +54,7 @@ export class BranchesService {
     const branch = await this.findOne(tenantId, id);
 
     if (branch.isMain) {
-      throw new BadRequestException('لا يمكن حذف الفرع الرئيسي');
+      throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_main_error'));
     }
 
     const activeStudentsCount = await this.prisma.student.count({
@@ -65,7 +66,7 @@ export class BranchesService {
     });
 
     if (activeStudentsCount > 0) {
-      throw new BadRequestException('لا يمكن حذف فرع به طلاب نشطون — انقل الطلاب أولاً');
+      throw new BadRequestException(I18nContext.current()!.t('messages.branch.delete_active_students_error'));
     }
 
     await this.prisma.branch.update({ where: { id }, data: { isActive: false } });

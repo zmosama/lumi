@@ -11,17 +11,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-
-function buildNavItems(orgType: OrgType) {
-  const branchLabel = BRANCH_TERM[orgType].plural;
-  return [
-    { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
-    { href: '/branches', label: branchLabel, icon: GitBranch },
-    { href: '/students', label: 'الطلاب', icon: Users },
-    { href: '/attendance', label: 'الحضور والغياب', icon: CheckSquare },
-    { href: '/finance', label: 'المالية', icon: DollarSign },
-  ];
-}
+import { useTranslations } from 'next-intl';
 
 const ORG_TYPE_BADGE_COLOR: Record<OrgType, string> = {
   SCHOOL: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -31,6 +21,9 @@ const ORG_TYPE_BADGE_COLOR: Record<OrgType, string> = {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations('Sidebar');
+  const tCommon = useTranslations('Common');
+  
   const [isOpen, setIsOpen] = useState(false);
   const [tenant, setTenant] = useState<{ name: string; orgType?: OrgType } | null>(null);
   const [user, setUser] = useState<{ name: string } | null>(null);
@@ -41,7 +34,15 @@ export function Sidebar() {
   }, []);
 
   const orgType = (tenant?.orgType || 'SCHOOL') as OrgType;
-  const navItems = buildNavItems(orgType);
+  const branchLabel = orgType === 'PRIVATE_TUTOR' ? t('groups') : t('branches');
+
+  const navItems = [
+    { href: '/dashboard', label: t('home'), icon: LayoutDashboard },
+    { href: '/branches', label: branchLabel, icon: GitBranch },
+    { href: '/students', label: t('students'), icon: Users },
+    { href: '/attendance', label: t('attendance'), icon: CheckSquare },
+    { href: '/finance', label: t('finance'), icon: DollarSign },
+  ];
 
   return (
     <>
@@ -74,8 +75,8 @@ export function Sidebar() {
                 <GraduationCap size={20} className="text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="font-ibm font-bold text-xl text-primary">Lumi</h1>
-                <p className="text-muted-foreground text-xs mt-0.5 truncate">{tenant?.name || 'نظام الإدارة'}</p>
+                <h1 className="font-ibm font-bold text-xl text-primary">{tCommon('lumi')}</h1>
+                <p className="text-muted-foreground text-xs mt-0.5 truncate">{tenant?.name || t('management_system')}</p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="lg:hidden text-muted-foreground hover:text-foreground flex-shrink-0">
@@ -85,7 +86,7 @@ export function Sidebar() {
           {tenant?.orgType && (
             <div className="mt-4">
               <span className={cn('inline-block text-[11px] px-2.5 py-1 rounded-md font-semibold', ORG_TYPE_BADGE_COLOR[orgType])}>
-                {ORG_TYPE_LABELS[orgType]}
+                {t(`org_type_${orgType.toLowerCase()}`)}
               </span>
             </div>
           )}
@@ -95,7 +96,8 @@ export function Sidebar() {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            // Next.js uses /[locale]/pathname, we might just check if pathname ends with or includes the href
+            const isActive = pathname.includes(item.href);
             return (
               <Link
                 key={item.href}
@@ -122,8 +124,8 @@ export function Sidebar() {
               <span className="text-sm font-bold text-primary">{user?.name?.charAt(0) || 'م'}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{user?.name || 'المسؤول'}</p>
-              <p className="text-xs text-muted-foreground">مدير النظام</p>
+              <p className="text-sm font-semibold text-foreground truncate">{user?.name || t('admin')}</p>
+              <p className="text-xs text-muted-foreground">{t('system_manager')}</p>
             </div>
           </div>
           <Button
@@ -132,7 +134,7 @@ export function Sidebar() {
             className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut size={16} className="ml-2" />
-            تسجيل الخروج
+            {t('logout')}
           </Button>
         </div>
       </aside>

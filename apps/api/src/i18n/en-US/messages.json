@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "Email already registered",
+    "email_registered_tenant": "Email already registered for this tenant",
+    "invalid_credentials": "Invalid credentials",
+    "access_denied": "Access denied",
+    "missing_platform_token": "Missing platform token",
+    "invalid_platform_token": "Invalid platform token",
+    "not_platform_token": "Not a platform token",
+    "only_owner": "Only OWNER can perform this action",
+    "user_not_active": "User or tenant no longer active"
+  },
+  "tenant": {
+    "subdomain_taken": "Subdomain already taken",
+    "not_found": "Tenant not found"
+  },
+  "branch": {
+    "not_found": "Branch not found",
+    "delete_main_error": "Cannot delete the main branch",
+    "delete_active_students_error": "Cannot delete a branch with active students — move them first"
+  },
+  "student": {
+    "not_found": "Student not found"
+  }
+}

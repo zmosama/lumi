@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "El correo electrónico ya está registrado",
+    "email_registered_tenant": "El correo electrónico ya está registrado para este inquilino",
+    "invalid_credentials": "Credenciales inválidas",
+    "access_denied": "Acceso denegado",
+    "missing_platform_token": "Falta el token de la plataforma",
+    "invalid_platform_token": "Token de plataforma inválido",
+    "not_platform_token": "No es un token de plataforma",
+    "only_owner": "Solo el PROPIETARIO puede realizar esta acción",
+    "user_not_active": "Usuario o inquilino ya no está activo"
+  },
+  "tenant": {
+    "subdomain_taken": "El subdominio ya está ocupado",
+    "not_found": "Inquilino no encontrado"
+  },
+  "branch": {
+    "not_found": "Sucursal no encontrada",
+    "delete_main_error": "No se puede eliminar la sucursal principal",
+    "delete_active_students_error": "No se puede eliminar una sucursal con estudiantes activos — muévalos primero"
+  },
+  "student": {
+    "not_found": "Estudiante no encontrado"
+  }
+}

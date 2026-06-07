@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "البريد الإلكتروني مسجل بالفعل",
+    "email_registered_tenant": "البريد الإلكتروني مسجل بالفعل لهذه المؤسسة",
+    "invalid_credentials": "بيانات الدخول غير صحيحة",
+    "access_denied": "ليس لديك صلاحية للقيام بهذا الإجراء",
+    "missing_platform_token": "رمز المنصة مفقود",
+    "invalid_platform_token": "رمز المنصة غير صالح",
+    "not_platform_token": "ليس رمز منصة",
+    "only_owner": "المالك فقط يمكنه القيام بهذا الإجراء",
+    "user_not_active": "المستخدم أو المؤسسة لم يعد نشطاً"
+  },
+  "tenant": {
+    "subdomain_taken": "الرابط الفرعي محجوز بالفعل",
+    "not_found": "المؤسسة غير موجودة"
+  },
+  "branch": {
+    "not_found": "الفرع غير موجود",
+    "delete_main_error": "لا يمكن حذف الفرع الرئيسي",
+    "delete_active_students_error": "لا يمكن حذف فرع به طلاب نشطون — انقل الطلاب أولاً"
+  },
+  "student": {
+    "not_found": "الطالب غير موجود"
+  }
+}

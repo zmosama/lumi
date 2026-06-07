@@ -1,0 +1,14 @@
+{
+  "isEmail": "$property geçerli bir e-posta adresi olmalıdır.",
+  "isNotEmpty": "$property boş olamaz.",
+  "isString": "$property bir metin olmalıdır.",
+  "minLength": "$property en az $constraint1 karakter uzunluğunda olmalıdır.",
+  "maxLength": "$property en fazla $constraint1 karakter uzunluğunda olmalıdır.",
+  "matches": "$property formatı geçersiz.",
+  "isEnum": "$property geçerli bir enum değeri olmalıdır.",
+  "isDateString": "$property geçerli bir tarih metni olmalıdır.",
+  "isArray": "$property bir dizi olmalıdır.",
+  "isIn": "$property şu değerlerden biri olmalıdır: $constraint1.",
+  "isNumber": "$property bir sayı olmalıdır.",
+  "isBoolean": "$property bir boolean olmalıdır."
+}

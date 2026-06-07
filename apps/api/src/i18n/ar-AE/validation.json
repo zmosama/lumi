@@ -1,0 +1,14 @@
+{
+  "isEmail": "حقل $property يجب أن يكون بريد إلكتروني صحيح.",
+  "isNotEmpty": "حقل $property مطلوب ولا يمكن أن يكون فارغاً.",
+  "isString": "حقل $property يجب أن يكون نصاً.",
+  "minLength": "حقل $property يجب أن يحتوي على الأقل $constraint1 حروف.",
+  "maxLength": "حقل $property يجب ألا يتجاوز $constraint1 حروف.",
+  "matches": "تنسيق الحقل $property غير صحيح.",
+  "isEnum": "قيمة الحقل $property غير صالحة.",
+  "isDateString": "تاريخ الحقل $property غير صحيح.",
+  "isArray": "الحقل $property يجب أن يكون قائمة.",
+  "isIn": "حقل $property يجب أن يكون إحدى القيم: $constraint1.",
+  "isNumber": "الحقل $property يجب أن يكون رقماً.",
+  "isBoolean": "الحقل $property يجب أن يكون قيمة منطقية (صح/خطأ)."
+}

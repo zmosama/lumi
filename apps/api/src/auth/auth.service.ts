@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { I18nContext } from 'nestjs-i18n';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
@@ -30,7 +31,7 @@ export class AuthService {
       where: { email_tenantId: { email: adminEmail, tenantId } },
     });
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException(I18nContext.current()!.t('messages.auth.email_registered'));
     }
 
     const passwordHash = await bcrypt.hash(adminPassword, 10);
@@ -55,19 +56,19 @@ export class AuthService {
       where: { subdomain, isActive: true },
     });
     if (!tenant) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_credentials'));
     }
 
     const user = await this.prisma.user.findUnique({
       where: { email_tenantId: { email, tenantId: tenant.id } },
     });
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_credentials'));
     }
 
     const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_credentials'));
     }
 
     const tokens = this.generateTokens(user.id, tenant.id, user.role, tenant.orgType);

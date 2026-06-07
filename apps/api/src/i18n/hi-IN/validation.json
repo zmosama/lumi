@@ -1,0 +1,14 @@
+{
+  "isEmail": "$property एक वैध ईमेल पता होना चाहिए।",
+  "isNotEmpty": "$property खाली नहीं हो सकता।",
+  "isString": "$property एक स्ट्रिंग होना चाहिए।",
+  "minLength": "$property कम से कम $constraint1 वर्णों का होना चाहिए।",
+  "maxLength": "$property अधिकतम $constraint1 वर्णों का होना चाहिए।",
+  "matches": "$property प्रारूप अमान्य है।",
+  "isEnum": "$property एक वैध enum मान होना चाहिए।",
+  "isDateString": "$property एक वैध तिथि स्ट्रिंग होनी चाहिए।",
+  "isArray": "$property एक सरणी होनी चाहिए।",
+  "isIn": "$property निम्नलिखित मानों में से एक होना चाहिए: $constraint1।",
+  "isNumber": "$property एक संख्या होनी चाहिए।",
+  "isBoolean": "$property एक बूलियन होना चाहिए।"
+}

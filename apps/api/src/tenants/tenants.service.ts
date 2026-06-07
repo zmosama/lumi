@@ -1,3 +1,4 @@
+import { I18nContext } from 'nestjs-i18n';
 import { Injectable, ConflictException } from '@nestjs/common';
 import { OrgType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -25,7 +26,7 @@ export class TenantsService {
 
     const existing = await this.prisma.tenant.findUnique({ where: { subdomain } });
     if (existing) {
-      throw new ConflictException('Subdomain already taken');
+      throw new ConflictException(I18nContext.current()!.t('messages.tenant.subdomain_taken'));
     }
 
     const tenant = await this.prisma.tenant.create({

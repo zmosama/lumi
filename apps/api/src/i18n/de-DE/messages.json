@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "E-Mail bereits registriert",
+    "email_registered_tenant": "E-Mail ist für diesen Mandanten bereits registriert",
+    "invalid_credentials": "Ungültige Anmeldedaten",
+    "access_denied": "Zugriff verweigert",
+    "missing_platform_token": "Plattform-Token fehlt",
+    "invalid_platform_token": "Ungültiges Plattform-Token",
+    "not_platform_token": "Kein Plattform-Token",
+    "only_owner": "Nur der EIGENTÜMER kann diese Aktion ausführen",
+    "user_not_active": "Benutzer oder Mandant ist nicht mehr aktiv"
+  },
+  "tenant": {
+    "subdomain_taken": "Subdomain ist bereits vergeben",
+    "not_found": "Mandant nicht gefunden"
+  },
+  "branch": {
+    "not_found": "Zweigstelle nicht gefunden",
+    "delete_main_error": "Die Hauptzweigstelle kann nicht gelöscht werden",
+    "delete_active_students_error": "Eine Zweigstelle mit aktiven Schülern kann nicht gelöscht werden — verschieben Sie diese zuerst"
+  },
+  "student": {
+    "not_found": "Schüler nicht gefunden"
+  }
+}

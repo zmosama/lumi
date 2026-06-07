@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "ईमेल पहले से पंजीकृत है",
+    "email_registered_tenant": "ईमेल इस किरायेदार के लिए पहले से पंजीकृत है",
+    "invalid_credentials": "अमान्य क्रेडेंशियल्स",
+    "access_denied": "पहुंच अस्वीकृत",
+    "missing_platform_token": "प्लेटफ़ॉर्म टोकन गायब है",
+    "invalid_platform_token": "अमान्य प्लेटफ़ॉर्म टोकन",
+    "not_platform_token": "प्लेटफ़ॉर्म टोकन नहीं है",
+    "only_owner": "केवल मालिक यह कार्रवाई कर सकता है",
+    "user_not_active": "उपयोगकर्ता या किरायेदार अब सक्रिय नहीं है"
+  },
+  "tenant": {
+    "subdomain_taken": "उपडोमेन पहले से ही लिया जा चुका है",
+    "not_found": "किरायेदार नहीं मिला"
+  },
+  "branch": {
+    "not_found": "शाखा नहीं मिली",
+    "delete_main_error": "मुख्य शाखा को हटाया नहीं जा सकता",
+    "delete_active_students_error": "सक्रिय छात्रों वाली शाखा को हटाया नहीं जा सकता - पहले उन्हें स्थानांतरित करें"
+  },
+  "student": {
+    "not_found": "छात्र नहीं मिला"
+  }
+}

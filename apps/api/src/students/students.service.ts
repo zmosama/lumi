@@ -1,3 +1,4 @@
+import { I18nContext } from 'nestjs-i18n';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -70,7 +71,7 @@ export class StudentsService {
       where: { id, tenantId },
     });
     if (!student) {
-      throw new NotFoundException('Student not found');
+      throw new NotFoundException(I18nContext.current()!.t('messages.student.not_found'));
     }
     return student;
   }

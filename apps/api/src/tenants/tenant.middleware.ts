@@ -1,6 +1,8 @@
+import { I18nContext } from 'nestjs-i18n';
 import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
+import { appRequestContext } from '@lumi/shared';
 
 export interface TenantRequest extends Request {
   tenant?: {
@@ -31,7 +33,7 @@ export class TenantMiddleware implements NestMiddleware {
     }
 
     if (!subdomain) {
-      throw new NotFoundException('Tenant not found');
+      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
     }
 
     const tenant = await this.prisma.tenant.findUnique({
@@ -40,10 +42,13 @@ export class TenantMiddleware implements NestMiddleware {
     });
 
     if (!tenant) {
-      throw new NotFoundException('Tenant not found');
+      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
     }
 
     req.tenant = tenant;
-    next();
+
+    appRequestContext.run({ tenantId: tenant.id }, () => {
+      next();
+    });
   }
 }

@@ -107,7 +107,7 @@ model Student {
   attendances Attendance[]
   payments    Payment[]
 
-  @@index([tenantId])
+  @@index([tenantId, id])
   @@index([branchId])
   @@index([status])
   @@map("students")
@@ -129,7 +129,7 @@ model Teacher {
 
   classes Class[]
 
-  @@index([tenantId])
+  @@index([tenantId, id])
   @@map("teachers")
 }
 
@@ -146,7 +146,7 @@ model Class {
   capacity  Int      @default(30)
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([tenantId])
+  @@index([tenantId, id])
   @@map("classes")
 }
 
@@ -162,7 +162,7 @@ model Attendance {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([studentId, date])
-  @@index([tenantId])
+  @@index([tenantId, id])
   @@map("attendance")
 }
 
@@ -179,6 +179,6 @@ model Payment {
   dueDate     DateTime? @map("due_date") @db.Date
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  @@index([tenantId])
+  @@index([tenantId, id])
   @@map("payments")
 }

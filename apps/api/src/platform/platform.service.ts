@@ -1,3 +1,4 @@
+import { I18nContext } from 'nestjs-i18n';
 import {
   Injectable,
   UnauthorizedException,
@@ -29,12 +30,12 @@ export class PlatformService {
     });
 
     if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_credentials'));
     }
 
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_credentials'));
     }
 
     const payload = { sub: user.id, type: 'platform', role: user.role };
@@ -85,7 +86,7 @@ export class PlatformService {
       where: { email_tenantId: { email: adminEmail, tenantId } },
     });
     if (existingUser) {
-      throw new ConflictException('Email already registered for this tenant');
+      throw new ConflictException(I18nContext.current()!.t('messages.auth.email_registered_tenant'));
     }
 
     const passwordHash = await bcrypt.hash(adminPassword, 10);
@@ -109,7 +110,7 @@ export class PlatformService {
   async toggleTenant(id: string) {
     const tenant = await this.prisma.tenant.findUnique({ where: { id } });
     if (!tenant) {
-      throw new NotFoundException('Tenant not found');
+      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
     }
 
     const updated = await this.prisma.tenant.update({
@@ -144,7 +145,7 @@ export class PlatformService {
       where: { email: dto.email },
     });
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException(I18nContext.current()!.t('messages.auth.email_registered'));
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);

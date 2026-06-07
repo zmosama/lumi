@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "email_registered": "E-mail déjà enregistré",
+    "email_registered_tenant": "E-mail déjà enregistré pour ce locataire",
+    "invalid_credentials": "Identifiants invalides",
+    "access_denied": "Accès refusé",
+    "missing_platform_token": "Jeton de plateforme manquant",
+    "invalid_platform_token": "Jeton de plateforme invalide",
+    "not_platform_token": "Ce n'est pas un jeton de plateforme",
+    "only_owner": "Seul le PROPRIÉTAIRE peut effectuer cette action",
+    "user_not_active": "Utilisateur ou locataire n'est plus actif"
+  },
+  "tenant": {
+    "subdomain_taken": "Le sous-domaine est déjà pris",
+    "not_found": "Locataire introuvable"
+  },
+  "branch": {
+    "not_found": "Succursale introuvable",
+    "delete_main_error": "Impossible de supprimer la succursale principale",
+    "delete_active_students_error": "Impossible de supprimer une succursale avec des étudiants actifs — veuillez les déplacer d'abord"
+  },
+  "student": {
+    "not_found": "Étudiant introuvable"
+  }
+}

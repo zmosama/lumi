@@ -1,3 +1,4 @@
+import { i18nValidationMessage } from 'nestjs-i18n';
 import {
   IsEmail, IsString, MinLength, MaxLength, Matches, IsNotEmpty,
   IsEnum, IsOptional, IsArray, ValidateNested,
@@ -8,13 +9,13 @@ import { OrgType } from '@prisma/client';
 
 class PlatformInitialBranchDto {
   @ApiProperty({ example: 'الفرع الرئيسي' })
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @IsNotEmpty({ message: i18nValidationMessage('validation.isNotEmpty') })
   name: string;
 
   @ApiPropertyOptional({ example: 'المعادي' })
-  @IsString()
-  @IsOptional()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @IsOptional({ message: i18nValidationMessage('validation.isOptional') })
   area?: string;
 
   @ApiPropertyOptional({
@@ -23,34 +24,34 @@ class PlatformInitialBranchDto {
     isArray: true,
     example: ['LANGUAGES'],
   })
-  @IsArray()
-  @IsOptional()
+  @IsArray({ message: i18nValidationMessage('validation.isArray') })
+  @IsOptional({ message: i18nValidationMessage('validation.isOptional') })
   curriculums?: string[];
 
   @ApiPropertyOptional({
     description: 'للمدارس فقط: PRIVATE | GOVERNMENT',
     example: 'PRIVATE',
   })
-  @IsString()
-  @IsOptional()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @IsOptional({ message: i18nValidationMessage('validation.isOptional') })
   ownership?: string;
 }
 
 export class CreateTenantPlatformDto {
   @ApiProperty({ example: 'مدرسة النور' })
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @IsNotEmpty({ message: i18nValidationMessage('validation.isNotEmpty') })
   tenantName: string;
 
   @ApiProperty({ example: 'alnoor', description: 'Subdomain (lowercase, no spaces)' })
-  @IsString()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
   @Matches(/^[a-z0-9-]+$/, { message: 'Subdomain must be lowercase alphanumeric with hyphens only' })
-  @MinLength(3)
-  @MaxLength(30)
+  @MinLength(3, { message: i18nValidationMessage('validation.minLength') })
+  @MaxLength(30, { message: i18nValidationMessage('validation.maxLength') })
   subdomain: string;
 
   @ApiProperty({ enum: OrgType, example: OrgType.SCHOOL })
-  @IsEnum(OrgType)
+  @IsEnum(OrgType, { message: i18nValidationMessage('validation.isEnum') })
   orgType: OrgType;
 
   @ApiProperty({ type: PlatformInitialBranchDto })
@@ -59,16 +60,16 @@ export class CreateTenantPlatformDto {
   initialBranch: PlatformInitialBranchDto;
 
   @ApiProperty({ example: 'admin@alnoor.com' })
-  @IsEmail()
+  @IsEmail({}, { message: i18nValidationMessage('validation.isEmail') })
   adminEmail: string;
 
   @ApiProperty({ example: 'StrongPassword123!' })
-  @IsString()
-  @MinLength(8)
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @MinLength(8, { message: i18nValidationMessage('validation.minLength') })
   adminPassword: string;
 
   @ApiProperty({ example: 'أحمد محمد' })
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: i18nValidationMessage('validation.isString') })
+  @IsNotEmpty({ message: i18nValidationMessage('validation.isNotEmpty') })
   adminName: string;
 }

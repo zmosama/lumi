@@ -1,3 +1,4 @@
+import { I18nContext } from 'nestjs-i18n';
 import {
   Injectable,
   CanActivate,
@@ -33,7 +34,7 @@ export class PlatformAuthGuard implements CanActivate {
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing platform token');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.missing_platform_token'));
     }
 
     const token = authHeader.slice(7);
@@ -44,11 +45,11 @@ export class PlatformAuthGuard implements CanActivate {
         secret: this.config.get('JWT_SECRET'),
       });
     } catch {
-      throw new UnauthorizedException('Invalid platform token');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.invalid_platform_token'));
     }
 
     if (payload.type !== 'platform') {
-      throw new UnauthorizedException('Not a platform token');
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.not_platform_token'));
     }
 
     request.platformUser = {

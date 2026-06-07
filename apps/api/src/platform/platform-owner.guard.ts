@@ -1,3 +1,4 @@
+import { I18nContext } from 'nestjs-i18n';
 import {
   Injectable,
   CanActivate,
@@ -26,7 +27,7 @@ export class PlatformOwnerGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<PlatformAuthRequest>();
 
     if (request.platformUser?.role !== 'OWNER') {
-      throw new ForbiddenException('Only OWNER can perform this action');
+      throw new ForbiddenException(I18nContext.current()!.t('messages.auth.only_owner'));
     }
 
     return true;

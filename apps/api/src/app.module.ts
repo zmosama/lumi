@@ -9,9 +9,23 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { PlatformModule } from './platform/platform.module';
 import { TenantMiddleware } from './tenants/tenant.middleware';
+import { I18nModule, AcceptLanguageResolver, QueryResolver, HeaderResolver } from 'nestjs-i18n';
+import * as path from 'path';
 
 @Module({
   imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'ar-EG',
+      loaderOptions: {
+        path: path.join(__dirname, '..', 'i18n'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+        new HeaderResolver(['x-custom-lang']),
+      ],
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
@@ -36,6 +50,8 @@ export class AppModule implements NestModule {
         { path: 'platform/(.*)', method: RequestMethod.ALL },
         { path: 'api/health', method: RequestMethod.GET },
         { path: 'health', method: RequestMethod.GET },
+        { path: 'api/docs', method: RequestMethod.GET },
+        { path: 'api/docs/(.*)', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }
