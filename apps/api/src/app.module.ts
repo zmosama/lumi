@@ -1,4 +1,8 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -27,6 +31,14 @@ import * as path from 'path';
       ],
     }),
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60000, // 1 min default
+    }),
     PrismaModule,
     AuthModule,
     TenantsModule,
@@ -35,6 +47,16 @@ import * as path from 'path';
     DashboardModule,
     AttendanceModule,
     PlatformModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
   ],
 })
 export class AppModule implements NestModule {

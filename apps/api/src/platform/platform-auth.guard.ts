@@ -30,14 +30,20 @@ export class PlatformAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<PlatformAuthRequest>();
-    const authHeader = request.headers.authorization;
+    const request = context.switchToHttp().getRequest<PlatformAuthRequest & { cookies: Record<string, string> }>();
+    
+    let token = request.cookies?.['access_token'];
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.missing_platform_token'));
+    if (!token) {
+      const authHeader = request.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.slice(7);
+      }
     }
 
-    const token = authHeader.slice(7);
+    if (!token) {
+      throw new UnauthorizedException(I18nContext.current()!.t('messages.auth.missing_platform_token'));
+    }
 
     let payload: PlatformJwtPayload;
     try {

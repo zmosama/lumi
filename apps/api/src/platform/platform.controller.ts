@@ -1,6 +1,8 @@
 import {
-  Controller, Get, Post, Patch, Body, Param, UseGuards, Req,
+  Controller, Get, Post, Patch, Body, Param, UseGuards, Req, Res, UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { Response } from 'express';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PlatformService } from './platform.service';
 import { PlatformLoginDto } from './platform-login.dto';
@@ -18,8 +20,18 @@ export class PlatformController {
 
   @Post('auth/login')
   @ApiOperation({ summary: 'Platform user login (OWNER or SALES)' })
-  login(@Body() dto: PlatformLoginDto) {
-    return this.platformService.login(dto);
+  async login(@Body() dto: PlatformLoginDto, @Res({ passthrough: true }) response: Response) {
+    const result = await this.platformService.login(dto);
+    response.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+    return {
+      user: result.user,
+      message: 'Logged in successfully',
+    };
   }
 
   // ── Tenants ─────────────────────────────────────────────────────────────
@@ -49,6 +61,9 @@ export class PlatformController {
 
   @Get('stats')
   @UseGuards(PlatformOwnerGuard)
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('platform_stats')
+  @CacheTTL(300000) // 5 minutes
   @ApiOperation({ summary: 'Platform-wide stats — OWNER only' })
   getStats() {
     return this.platformService.getStats();

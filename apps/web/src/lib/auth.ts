@@ -25,11 +25,12 @@ export interface RegisterPayload {
 export async function login(payload: LoginPayload) {
   const { data } = await api.post('/auth/login', payload);
   if (typeof window !== 'undefined') {
-    localStorage.setItem('access_token', data.accessToken);
-    localStorage.setItem('refresh_token', data.refreshToken);
     localStorage.setItem('tenant_subdomain', payload.subdomain);
     localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('tenant', JSON.stringify(data.tenant));
+    // data.tenant might not be returned in all endpoints, check if needed
+    if (data.tenant) {
+      localStorage.setItem('tenant', JSON.stringify(data.tenant));
+    }
   }
   return data;
 }
@@ -60,5 +61,5 @@ export function getTenant() {
 
 export function isAuthenticated() {
   if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('access_token');
+  return !!localStorage.getItem('user');
 }

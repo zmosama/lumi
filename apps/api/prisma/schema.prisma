@@ -31,6 +31,7 @@ model Tenant {
   classes     Class[]
   attendances Attendance[]
   payments    Payment[]
+  auditLogs   AuditLog[]
 
   @@map("tenants")
 }
@@ -181,4 +182,19 @@ model Payment {
 
   @@index([tenantId, id])
   @@map("payments")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  details   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId, id])
+  @@map("audit_logs")
 }
