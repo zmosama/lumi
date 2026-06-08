@@ -14,15 +14,20 @@ import { PlatformLoginDto } from './platform-login.dto';
 import { CreateTenantPlatformDto } from './create-tenant-platform.dto';
 import { CreatePlatformUserDto } from './create-platform-user.dto';
 import { PlatformRole } from '@prisma/client';
+import { PlatformDomainService } from '@lumi/domain';
 
 @Injectable()
 export class PlatformService {
+  private domainService: PlatformDomainService;
+
   constructor(
     private prisma: PrismaService,
     private tenantsService: TenantsService,
     private jwtService: JwtService,
     private config: ConfigService,
-  ) {}
+  ) {
+    this.domainService = new PlatformDomainService(this.prisma);
+  }
 
   async login(dto: PlatformLoginDto) {
     const user = await this.prisma.platformUser.findUnique({
@@ -56,20 +61,7 @@ export class PlatformService {
   }
 
   async listTenants() {
-    const tenants = await this.prisma.tenant.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        subdomain: true,
-        orgType: true,
-        plan: true,
-        isActive: true,
-        createdAt: true,
-        _count: { select: { users: true } },
-      },
-    });
-    return tenants;
+    return this.domainService.listTenants();
   }
 
   async createTenantForClient(dto: CreateTenantPlatformDto) {
@@ -108,36 +100,22 @@ export class PlatformService {
   }
 
   async toggleTenant(id: string) {
-    const tenant = await this.prisma.tenant.findUnique({ where: { id } });
-    if (!tenant) {
-      throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
+    try {
+      const updated = await this.domainService.toggleTenant(id);
+      return {
+        message: `Tenant ${updated.isActive ? 'activated' : 'deactivated'}`,
+        tenant: updated,
+      };
+    } catch (e: any) {
+      if (e.message === 'TENANT_NOT_FOUND') {
+        throw new NotFoundException(I18nContext.current()!.t('messages.tenant.not_found'));
+      }
+      throw e;
     }
-
-    const updated = await this.prisma.tenant.update({
-      where: { id },
-      data: { isActive: !tenant.isActive },
-      select: { id: true, name: true, subdomain: true, isActive: true },
-    });
-
-    return {
-      message: `Tenant ${updated.isActive ? 'activated' : 'deactivated'}`,
-      tenant: updated,
-    };
   }
 
   async getStats() {
-    const [total, active, trial] = await Promise.all([
-      this.prisma.tenant.count(),
-      this.prisma.tenant.count({ where: { isActive: true } }),
-      this.prisma.tenant.count({ where: { plan: 'trial' } }),
-    ]);
-
-    return {
-      totalTenants: total,
-      activeTenants: active,
-      trialTenants: trial,
-      inactiveTenants: total - active,
-    };
+    return this.domainService.getStats();
   }
 
   async createPlatformUser(dto: CreatePlatformUserDto) {
@@ -163,9 +141,6 @@ export class PlatformService {
   }
 
   async listPlatformUsers() {
-    return this.prisma.platformUser.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true },
-    });
+    return this.domainService.listPlatformUsers();
   }
 }

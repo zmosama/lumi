@@ -13,6 +13,9 @@ import {
 import { cn } from '@/lib/utils';
 import { Plus, MapPin, X, Star, Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { components } from '@/types/api.generated';
+
+type CreateBranchPayload = components['schemas']['CreateBranchDto'];
 
 const useBranchSchema = () => {
   const t = useTranslations('Validation');
@@ -141,10 +144,10 @@ function BranchModal({
 
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
-      const payload = {
+      const payload: CreateBranchPayload = {
         name: data.name,
         area: data.area || undefined,
-        curriculums: isSchool ? selectedCurriculums : [],
+        curriculums: isSchool ? selectedCurriculums : undefined,
         ownership: isSchool && selectedOwnership ? selectedOwnership : undefined,
       };
       return editBranch

@@ -8,6 +8,9 @@ import { api } from '@/lib/api';
 import { Branch } from '@/types';
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { components } from '@/types/api.generated';
+
+type CreateStudentPayload = components['schemas']['CreateStudentDto'];
 
 const useStudentSchema = () => {
   const t = useTranslations('Validation');
@@ -52,7 +55,19 @@ export function AddStudentModal({ isOpen, onClose, onSuccess, defaultBranchId }:
   });
 
   const mutation = useMutation({
-    mutationFn: (data: FormData) => api.post('/students', data),
+    mutationFn: (data: FormData) => {
+      const payload: CreateStudentPayload = {
+        branchId: data.branchId,
+        name: data.name,
+        phone: data.phone || undefined,
+        parentName: data.parentName || undefined,
+        parentPhone: data.parentPhone || undefined,
+        grade: data.grade || undefined,
+        className: data.className || undefined,
+        notes: data.notes || undefined,
+      };
+      return api.post('/students', payload);
+    },
     onSuccess: () => { reset(); onSuccess(); },
   });
 
